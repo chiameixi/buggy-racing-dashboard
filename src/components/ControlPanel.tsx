@@ -16,41 +16,54 @@
 import type { Lap } from '../types';
 import { DriverSection } from './DriverSection';
 import { groupByDriver } from '../utils/groupByDriver';
+import { PlaybackControls } from './PlaybackControls';
 import './ControlPanel.css';
 
 type ControlPanelProps = {
   laps: Lap[];
   visibleLapIds: Set<string>;
   showHeatmap: boolean;
+  isPlaying: boolean;
+  currentTime: number;
+  playbackSpeed: number;
   onToggleLap: (lapId: string) => void;
   onToggleDriver: (driver: string) => void;
   onToggleHeatmap: () => void;
+  onTogglePlay: () => void;
+  onSeek: (time: number) => void;
+  onReset: () => void;
 };
 
 export function ControlPanel({ 
   laps, 
   visibleLapIds, 
   showHeatmap,
+  isPlaying,
+  currentTime,
   onToggleLap, 
   onToggleDriver,
-  onToggleHeatmap
+  onToggleHeatmap,
+  onTogglePlay,
+  onSeek,
+  onReset
 }: ControlPanelProps) {
   const lapsByDriver = groupByDriver(laps);
 
   return (
     <div className="control-panel">
-      <h2>Drivers</h2>
-      
-      {Object.entries(lapsByDriver).map(([driver, driverLaps]) => (
-        <DriverSection
-          key={driver}
-          driver={driver}
-          laps={driverLaps}
-          visibleLapIds={visibleLapIds}
-          onToggleLap={onToggleLap}
-          onToggleDriver={onToggleDriver}
-        />
-      ))}
+      <div className="control-section">
+        <h2>Drivers</h2>
+        {Object.entries(lapsByDriver).map(([driver, driverLaps]) => (
+          <DriverSection
+            key={driver}
+            driver={driver}
+            laps={driverLaps}
+            visibleLapIds={visibleLapIds}
+            onToggleLap={onToggleLap}
+            onToggleDriver={onToggleDriver}
+          />
+        ))}
+      </div>
 
       <div className="control-section">
         <h2>Visualization</h2>
@@ -64,7 +77,16 @@ export function ControlPanel({
         </label>
       </div>
 
-
+      <div className = "control-section">
+        <h2>Playback Controls</h2>
+        <PlaybackControls
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          onTogglePlay={onTogglePlay}
+          onSeek={onSeek}
+          onReset={onReset}
+        />
+      </div>
     </div>
   );
 }

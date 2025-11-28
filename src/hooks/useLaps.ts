@@ -22,6 +22,11 @@ export function useLaps() {
   const [laps, setLaps] = useState<Lap[]>([]);
   const [visibleLapIds, setVisibleLapIds] = useState<Set<string>>(new Set()); //set for faster lookup
   const [showHeatmap, setShowHeatmap] = useState(false);  // toggle heatmap
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0); // in seconds
+  const [playbackSpeed, setPlaybackSpeed] = useState(1); // 1x speed
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -107,7 +112,6 @@ export function useLaps() {
     });
   };
 
-
   // Toggle visibility of all laps for a given driver
   const toggleDriverVisibility = (driver: string) => {
     // get all lap IDs + current visibility state for the driver
@@ -131,7 +135,40 @@ export function useLaps() {
     setShowHeatmap(prev => !prev);
   };
 
+  // TogglePlayback function
+  const togglePlayback = () => {
+    setIsPlaying(prev => !prev);
+  }
 
+  // set progress to update the current time to a percentage of total time
+  const setProgress = (percentage: number) => {
+    setCurrentTime(percentage);
+  }
+
+  const resetPlayback = () => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+  }
+
+  // animation loop to update current time based on playback speed
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const interval = setInterval(() => {
+      setCurrentTime(prevTime => {
+        const newTime = prevTime + (0.5 * playbackSpeed); // update every 50ms
+        if (newTime >= 100) { //max percentage
+          setIsPlaying(false);
+          return 100;
+        } 
+        else {
+          return newTime;
+        }
+      });
+    }, 50); // update every 50ms
+
+    return () => clearInterval(interval);
+  }, [isPlaying, playbackSpeed]);
 
 
   // Get currently visible laps
@@ -142,6 +179,12 @@ export function useLaps() {
     visibleLaps,
     visibleLapIds,
     showHeatmap,
+    isPlaying,
+    currentTime,
+    playbackSpeed,
+    togglePlayback,
+    setProgress,
+    resetPlayback,
     loading,
     error,
     toggleLapVisibility,

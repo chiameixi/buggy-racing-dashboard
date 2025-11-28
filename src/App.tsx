@@ -16,6 +16,12 @@ function App() {
     laps,
     visibleLaps,
     visibleLapIds,
+    isPlaying,
+    currentTime,
+    playbackSpeed,
+    togglePlayback,
+    setProgress,
+    resetPlayback,
     loading,
     error,
     toggleLapVisibility,
@@ -36,16 +42,22 @@ function App() {
             laps={laps}
             visibleLapIds={visibleLapIds}
             showHeatmap={showHeatmap}
+            isPlaying={isPlaying} 
+            currentTime={currentTime}
+            playbackSpeed={playbackSpeed}
             onToggleHeatmap={toggleHeatmap}
             onToggleLap={toggleLapVisibility}
             onToggleDriver={toggleDriverVisibility}
+            onTogglePlay={togglePlayback}
+            onSeek ={setProgress}
+            onReset={resetPlayback}
           />
         </aside>
         
         <main className="map-section">
           {loading && <div className="status">Loading GPX data...</div>}
           {error && <div className="status error">Error: {error}</div>}
-          {!loading && !error && <MapView laps={visibleLaps} showHeatmap={showHeatmap} />}
+          {!loading && !error && <MapView laps={visibleLaps} showHeatmap={showHeatmap} currentTime={currentTime} />}
         </main>
       </div>
     </div>
