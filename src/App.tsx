@@ -4,9 +4,6 @@
   manages lap data loading, visibility toggling, and error handling.  
 */
 
-
-
-
 /* Imports */
 import { MapView } from './components/MapView';
 import { ControlPanel } from './components/ControlPanel';
@@ -22,7 +19,9 @@ function App() {
     loading,
     error,
     toggleLapVisibility,
-    toggleDriverVisibility
+    toggleDriverVisibility,
+    toggleHeatmap,
+    showHeatmap
   } = useLaps();
 
   return (
@@ -36,6 +35,8 @@ function App() {
           <ControlPanel 
             laps={laps}
             visibleLapIds={visibleLapIds}
+            showHeatmap={showHeatmap}
+            onToggleHeatmap={toggleHeatmap}
             onToggleLap={toggleLapVisibility}
             onToggleDriver={toggleDriverVisibility}
           />
@@ -44,7 +45,7 @@ function App() {
         <main className="map-section">
           {loading && <div className="status">Loading GPX data...</div>}
           {error && <div className="status error">Error: {error}</div>}
-          {!loading && !error && <MapView laps={visibleLaps} />}
+          {!loading && !error && <MapView laps={visibleLaps} showHeatmap={showHeatmap} />}
         </main>
       </div>
     </div>

@@ -20,7 +20,8 @@ type GpxFileConfig = {
 
 export function useLaps() {
   const [laps, setLaps] = useState<Lap[]>([]);
-  const [visibleLapIds, setVisibleLapIds] = useState<Set<string>>(new Set());
+  const [visibleLapIds, setVisibleLapIds] = useState<Set<string>>(new Set()); //set for faster lookup
+  const [showHeatmap, setShowHeatmap] = useState(false);  // toggle heatmap
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,17 +61,37 @@ export function useLaps() {
         }));
     });
 
-    Promise.all(loadPromises)
-      .then(loadedLaps => {
-        setLaps(loadedLaps);
-        // Make all laps visible by default
-        setVisibleLapIds(new Set(loadedLaps.map(lap => lap.id)));
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
+  Promise.all(loadPromises)
+  .then(loadedLaps => {
+    // Log the loaded data
+    console.log('=== LOADED LAPS ===');
+    loadedLaps.forEach(lap => {
+      console.log(`\n${lap.name} (${lap.driver}):`);
+      console.log(`- Total points: ${lap.points.length}`);
+      console.log(`- First point:`, lap.points[0]);
+      console.log(`- Sample speeds (first 10 points):`);
+      lap.points.slice(0, 10).forEach((pt, i) => {
+        console.log(`  Point ${i}: ${pt.speed?.toFixed(2)} m/s (${(pt.speed || 0) * 2.237}mph)`);
       });
+      
+      // Stats
+      const speeds = lap.points.map(p => p.speed).filter(s => s !== undefined) as number[];
+      const minSpeed = Math.min(...speeds);
+      const maxSpeed = Math.max(...speeds);
+      const avgSpeed = speeds.reduce((a, b) => a + b, 0) / speeds.length;
+      
+      console.log(`- Speed range: ${minSpeed.toFixed(2)} - ${maxSpeed.toFixed(2)} m/s`);
+      console.log(`- Average speed: ${avgSpeed.toFixed(2)} m/s (${(avgSpeed * 2.237).toFixed(1)} mph)`);
+    });
+    
+    setLaps(loadedLaps);
+    setVisibleLapIds(new Set(loadedLaps.map(lap => lap.id)));
+    setLoading(false);
+  })
+  .catch(err => {
+    setError(err.message);
+    setLoading(false);
+  });
   }, []);
 
   // Toggle visibility of a single lap
@@ -105,6 +126,14 @@ export function useLaps() {
     });
   };
 
+  // toggle heatmap display
+  const toggleHeatmap = () => {  // ADD THIS
+    setShowHeatmap(prev => !prev);
+  };
+
+
+
+
   // Get currently visible laps
   const visibleLaps = laps.filter(lap => visibleLapIds.has(lap.id));
 
@@ -112,9 +141,11 @@ export function useLaps() {
     laps,
     visibleLaps,
     visibleLapIds,
+    showHeatmap,
     loading,
     error,
     toggleLapVisibility,
-    toggleDriverVisibility
+    toggleDriverVisibility, 
+    toggleHeatmap
   };
 }

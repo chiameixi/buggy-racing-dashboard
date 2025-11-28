@@ -21,15 +21,19 @@ import './ControlPanel.css';
 type ControlPanelProps = {
   laps: Lap[];
   visibleLapIds: Set<string>;
+  showHeatmap: boolean;
   onToggleLap: (lapId: string) => void;
   onToggleDriver: (driver: string) => void;
+  onToggleHeatmap: () => void;
 };
 
 export function ControlPanel({ 
   laps, 
   visibleLapIds, 
+  showHeatmap,
   onToggleLap, 
-  onToggleDriver 
+  onToggleDriver,
+  onToggleHeatmap
 }: ControlPanelProps) {
   const lapsByDriver = groupByDriver(laps);
 
@@ -47,6 +51,20 @@ export function ControlPanel({
           onToggleDriver={onToggleDriver}
         />
       ))}
+
+      <div className="control-section">
+        <h2>Visualization</h2>
+        <label className="toggle-option">
+          <input
+            type="checkbox"
+            checked={showHeatmap}
+            onChange={onToggleHeatmap}
+          />
+          <span> Speed Heatmap</span>
+        </label>
+      </div>
+
+
     </div>
   );
 }
