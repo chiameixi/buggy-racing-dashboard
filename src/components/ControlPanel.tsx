@@ -26,12 +26,17 @@ type ControlPanelProps = {
   isPlaying: boolean;
   currentTime: number;
   playbackSpeed: number;
+  isDrawMode: boolean;
+  drawnPathsCount: number;
   onToggleLap: (lapId: string) => void;
   onToggleDriver: (driver: string) => void;
   onToggleHeatmap: () => void;
   onTogglePlay: () => void;
   onSeek: (time: number) => void;
   onReset: () => void;
+  onToggleDrawMode: () => void;
+  onClearDrawings: () => void;
+  onUndoDrawing: () => void;
 };
 
 export function ControlPanel({ 
@@ -40,12 +45,17 @@ export function ControlPanel({
   showHeatmap,
   isPlaying,
   currentTime,
+  isDrawMode,
+  drawnPathsCount,
   onToggleLap, 
   onToggleDriver,
   onToggleHeatmap,
   onTogglePlay,
   onSeek,
-  onReset
+  onReset,
+  onToggleDrawMode,
+  onClearDrawings,
+  onUndoDrawing
 }: ControlPanelProps) {
   const lapsByDriver = groupByDriver(laps);
 
@@ -86,6 +96,29 @@ export function ControlPanel({
           onSeek={onSeek}
           onReset={onReset}
         />
+      </div>
+
+      <div className="control-section">
+        <h2>Annotations</h2>
+        <label className="toggle-option">
+          <input
+            type="checkbox"
+            checked={isDrawMode}
+            onChange={onToggleDrawMode}
+          />
+          <span>Draw Mode {isDrawMode && '✏️'}</span>
+        </label>
+        
+        {drawnPathsCount > 0 && (
+          <div className="drawing-controls">
+            <button onClick={onUndoDrawing} className="control-btn">
+              ↶ Undo
+            </button>
+            <button onClick={onClearDrawings} className="control-btn">
+              🗑 Clear All ({drawnPathsCount})
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

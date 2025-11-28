@@ -30,6 +30,10 @@ export function useLaps() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  //drawing 
+  const [isDrawMode, setIsDrawMode] = useState(false);
+  const [drawnPaths, setDrawnPaths] = useState<Array<{id: string, points: [number, number][]}>>([]);
+
   useEffect(() => {
     const gpxFiles: GpxFileConfig[] = [
       { 
@@ -150,6 +154,28 @@ export function useLaps() {
     setCurrentTime(0);
   }
 
+  // drawing toggles 
+  const toggleDrawMode = () => {
+    setIsDrawMode(prev => !prev);
+  }
+
+  // add a new drawn path 
+  // representation: array of lat/lon points
+  const addDrawnPath = (points: [number, number][]) => {
+    const newPath = {
+      id: `path-${Date.now()}`,
+      points
+    };
+    setDrawnPaths(prev => [...prev, newPath]);
+  };
+
+  const clearAllDrawings = () => {
+    setDrawnPaths([]);
+  };
+
+  const undoLastDrawing = () => {
+    setDrawnPaths(prev => prev.slice(0, -1));
+  };
   // animation loop to update current time based on playback speed
   useEffect(() => {
     if (!isPlaying) return;
@@ -182,6 +208,12 @@ export function useLaps() {
     isPlaying,
     currentTime,
     playbackSpeed,
+    isDrawMode,
+    drawnPaths,
+    toggleDrawMode,
+    addDrawnPath,
+    clearAllDrawings,
+    undoLastDrawing,
     togglePlayback,
     setProgress,
     resetPlayback,

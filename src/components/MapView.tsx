@@ -3,6 +3,7 @@ import type { Lap, GpxPoint } from '../types';
 import { getSpeedRange, getSpeedColor } from '../utils/speedColor';
 import { SpeedLegend } from './SpeedLegend';
 import { TelemetryDisplay } from './TelemetryDisplay';
+import { DrawingLayer } from './DrawingLayer';
 import 'leaflet/dist/leaflet.css';
 import './MapView.css';
 
@@ -10,6 +11,9 @@ type MapViewProps = {
   laps: Lap[];
   showHeatmap?: boolean;
   currentTime: number; // percentage of playback progress 0-100
+  isDrawMode: boolean;
+  drawnPaths: Array<{ id: string; points: [number, number][] }>; // array of drawn paths
+  onPathComplete: (points: [number, number][]) => void;
 };
 
 // get point at specific time percentage in lap
@@ -24,7 +28,7 @@ function getPointAtTime(lap: Lap, timePercentage: number): GpxPoint | null {
   return lap.points[index];
 }
 
-export function MapView({ laps, showHeatmap, currentTime }: MapViewProps) {
+export function MapView({ laps, showHeatmap, currentTime, isDrawMode, drawnPaths, onPathComplete }: MapViewProps) {
   if (laps.length === 0) {
     return <div className="map-loading">No data to display</div>;
   }
@@ -80,6 +84,14 @@ export function MapView({ laps, showHeatmap, currentTime }: MapViewProps) {
               );
             }
           })}
+
+
+          {/* ]Drawing layer */}
+          <DrawingLayer 
+            isDrawMode={isDrawMode}
+            drawnPaths={drawnPaths}
+            onPathComplete={onPathComplete}
+          />
 
           {/* Playback marker */}
           {

@@ -61,4 +61,25 @@
 .lap-date {
   font-size: 12px;
   color: #6b7280;
+} 
+
+.drawing-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.drawing-controls .control-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.drawing-controls .control-btn:hover {
+  background: #e5e7eb;
 }

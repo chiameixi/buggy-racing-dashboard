@@ -18,6 +18,8 @@ function App() {
     visibleLapIds,
     isPlaying,
     currentTime,
+    isDrawMode, 
+    drawnPaths,
     playbackSpeed,
     togglePlayback,
     setProgress,
@@ -27,7 +29,11 @@ function App() {
     toggleLapVisibility,
     toggleDriverVisibility,
     toggleHeatmap,
-    showHeatmap
+    showHeatmap,
+    toggleDrawMode,
+    addDrawnPath,
+    clearAllDrawings,
+    undoLastDrawing
   } = useLaps();
 
   return (
@@ -44,6 +50,8 @@ function App() {
             showHeatmap={showHeatmap}
             isPlaying={isPlaying} 
             currentTime={currentTime}
+            isDrawMode={isDrawMode}
+            drawnPathsCount={drawnPaths.length}
             playbackSpeed={playbackSpeed}
             onToggleHeatmap={toggleHeatmap}
             onToggleLap={toggleLapVisibility}
@@ -51,13 +59,24 @@ function App() {
             onTogglePlay={togglePlayback}
             onSeek ={setProgress}
             onReset={resetPlayback}
+            onToggleDrawMode={toggleDrawMode}
+            onClearDrawings={clearAllDrawings}
+            onUndoDrawing={undoLastDrawing}
           />
         </aside>
         
         <main className="map-section">
           {loading && <div className="status">Loading GPX data...</div>}
           {error && <div className="status error">Error: {error}</div>}
-          {!loading && !error && <MapView laps={visibleLaps} showHeatmap={showHeatmap} currentTime={currentTime} />}
+          {!loading && !error && 
+          <MapView 
+            laps={visibleLaps} 
+            showHeatmap={showHeatmap} 
+            currentTime={currentTime} 
+            isDrawMode={isDrawMode}
+            drawnPaths={drawnPaths}
+            onPathComplete={addDrawnPath}
+          />}
         </main>
       </div>
     </div>
