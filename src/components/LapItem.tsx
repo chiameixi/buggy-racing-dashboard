@@ -1,7 +1,7 @@
 import type { Lap } from '../types';
 import './LapItem.css';
 
-type LapItemProps = {
+interface LapItemProps {
   lap: Lap;
   isVisible: boolean;
   onToggle: () => void;

@@ -7,7 +7,7 @@ import { DrawingLayer } from './DrawingLayer';
 import 'leaflet/dist/leaflet.css';
 import './MapView.css';
 
-type MapViewProps = {
+interface MapViewProps {
   laps: Lap[];
   showHeatmap?: boolean;
   currentTime: number; // percentage of playback progress 0-100

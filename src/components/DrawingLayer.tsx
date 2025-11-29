@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 
-type DrawingLayerProps = {
+interface DrawingLayerProps {
   isDrawMode: boolean;
   drawnPaths: Array<{ id: string; points: [number, number][] }>;
   onPathComplete: (points: [number, number][]) => void;

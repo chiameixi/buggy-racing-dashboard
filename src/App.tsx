@@ -5,13 +5,17 @@
 */
 
 /* Imports */
+import { useState } from 'react';
 import { MapView } from './components/MapView';
 import { ControlPanel } from './components/ControlPanel';
+import { Header } from './components/Header';
 import { useLaps } from './hooks/useLaps';
 import './App.css';
 
 
 function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const {
     laps,
     visibleLaps,
@@ -38,32 +42,32 @@ function App() {
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <h1>Buggy Racing Dashboard</h1>
-      </header>
+      <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       
       <div className="app-main">
-        <aside className="sidebar">
-          <ControlPanel 
-            laps={laps}
-            visibleLapIds={visibleLapIds}
-            showHeatmap={showHeatmap}
-            isPlaying={isPlaying} 
-            currentTime={currentTime}
-            isDrawMode={isDrawMode}
-            drawnPathsCount={drawnPaths.length}
-            playbackSpeed={playbackSpeed}
-            onToggleHeatmap={toggleHeatmap}
-            onToggleLap={toggleLapVisibility}
-            onToggleDriver={toggleDriverVisibility}
-            onTogglePlay={togglePlayback}
-            onSeek ={setProgress}
-            onReset={resetPlayback}
-            onToggleDrawMode={toggleDrawMode}
-            onClearDrawings={clearAllDrawings}
-            onUndoDrawing={undoLastDrawing}
-          />
-        </aside>
+        {sidebarOpen && (
+          <aside className="sidebar">
+            <ControlPanel 
+              laps={laps}
+              visibleLapIds={visibleLapIds}
+              showHeatmap={showHeatmap}
+              isPlaying={isPlaying} 
+              currentTime={currentTime}
+              isDrawMode={isDrawMode}
+              drawnPathsCount={drawnPaths.length}
+              playbackSpeed={playbackSpeed}
+              onToggleHeatmap={toggleHeatmap}
+              onToggleLap={toggleLapVisibility}
+              onToggleDriver={toggleDriverVisibility}
+              onTogglePlay={togglePlayback}
+              onSeek ={setProgress}
+              onReset={resetPlayback}
+              onToggleDrawMode={toggleDrawMode}
+              onClearDrawings={clearAllDrawings}
+              onUndoDrawing={undoLastDrawing}
+            />
+          </aside>
+        )}
         
         <main className="map-section">
           {loading && <div className="status">Loading GPX data...</div>}

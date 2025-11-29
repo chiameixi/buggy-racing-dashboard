@@ -5,7 +5,7 @@
 
 import './PlaybackControls.css';
 
-type PlaybackControlsProps = {
+interface PlaybackControlsProps {
   isPlaying: boolean;
   currentTime: number; // percentage 0-100
 //   playbackSpeed: number;

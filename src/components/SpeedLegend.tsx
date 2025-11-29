@@ -1,7 +1,7 @@
 import { formatSpeed } from '../utils/speedColor';
 import './SpeedLegend.css';
 
-type SpeedLegendProps = {
+interface SpeedLegendProps {
   minSpeed: number;
   maxSpeed: number;
 };

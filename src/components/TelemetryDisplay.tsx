@@ -7,7 +7,7 @@
 import type { GpxPoint } from '../types';
 import './TelemetryDisplay.css';
 
-type TelemetryDisplayProps = {
+interface TelemetryDisplayProps {
   currentPoint: GpxPoint | null;
 };
 

@@ -19,7 +19,7 @@ import type { Lap } from '../types';
 import { LapItem } from './LapItem';
 import './DriverSection.css';
 
-type DriverSectionProps = {
+interface DriverSectionProps {
   driver: string;
   laps: Lap[];
   visibleLapIds: Set<string>;

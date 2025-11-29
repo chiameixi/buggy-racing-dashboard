@@ -19,7 +19,7 @@ import { groupByDriver } from '../utils/groupByDriver';
 import { PlaybackControls } from './PlaybackControls';
 import './ControlPanel.css';
 
-type ControlPanelProps = {
+interface ControlPanelProps {
   laps: Lap[];
   visibleLapIds: Set<string>;
   showHeatmap: boolean;
