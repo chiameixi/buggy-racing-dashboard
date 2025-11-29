@@ -14,10 +14,20 @@
  */
 
 import type { Lap } from '../types';
+import { useState } from 'react';
 import { DriverSection } from './DriverSection';
 import { groupByDriver } from '../utils/groupByDriver';
 import { PlaybackControls } from './PlaybackControls';
 import './ControlPanel.css';
+
+// Icon imports
+const imgCheckedCheckbox = "../../public/icons/Checked Checkbox.png";
+const imgPlay = "../../public/icons/Play.png";
+const imgReset = "../../public/icons/Reset.png";
+const imgPencil = "../../public/icons/Pencil.png";
+const imgErase = "../../public/icons/Erase.png";
+const imgTrash = "../../public/icons/Trash.png";
+const imgUndo = "../../public/icons/Undo.png";
 
 interface ControlPanelProps {
   laps: Lap[];
@@ -46,7 +56,6 @@ export function ControlPanel({
   isPlaying,
   currentTime,
   isDrawMode,
-  drawnPathsCount,
   onToggleLap, 
   onToggleDriver,
   onToggleHeatmap,
@@ -58,67 +67,122 @@ export function ControlPanel({
   onUndoDrawing
 }: ControlPanelProps) {
   const lapsByDriver = groupByDriver(laps);
+  const [hoveredTool, setHoveredTool] = useState<string | null>(null);
 
   return (
     <div className="control-panel">
-      <div className="control-section">
-        <h2>Drivers</h2>
-        {Object.entries(lapsByDriver).map(([driver, driverLaps]) => (
-          <DriverSection
-            key={driver}
-            driver={driver}
-            laps={driverLaps}
-            visibleLapIds={visibleLapIds}
-            onToggleLap={onToggleLap}
-            onToggleDriver={onToggleDriver}
-          />
-        ))}
+      {/* Data Section */}
+      <div className="control-section data-section">
+        <h2 className="section-title">Data</h2>
+        <div className="data-content">
+          {Object.entries(lapsByDriver).map(([driver, driverLaps]) => (
+            <DriverSection
+              key={driver}
+              driver={driver}
+              laps={driverLaps}
+              visibleLapIds={visibleLapIds}
+              onToggleLap={onToggleLap}
+              onToggleDriver={onToggleDriver}
+            />
+          ))}
+        </div>
       </div>
 
-      <div className="control-section">
-        <h2>Visualization</h2>
-        <label className="toggle-option">
-          <input
-            type="checkbox"
-            checked={showHeatmap}
-            onChange={onToggleHeatmap}
-          />
-          <span> Speed Heatmap</span>
-        </label>
+      {/* Visualisation Section */}
+      <div className="control-section visualization-section">
+        <h2 className="section-title">Visualisation</h2>
+        <div className="visualization-content">
+          <button 
+            className={`heatmap-toggle ${showHeatmap ? 'active' : ''}`}
+            onClick={onToggleHeatmap}
+            title="Toggle speed heatmap"
+          >
+            <div className={`toggle-slider ${showHeatmap ? 'on' : 'off'}`}></div>
+          </button>
+          <span>Speed Heatmap</span>
+        </div>
       </div>
 
-      <div className = "control-section">
-        <h2>Playback Controls</h2>
-        <PlaybackControls
-          isPlaying={isPlaying}
-          currentTime={currentTime}
-          onTogglePlay={onTogglePlay}
-          onSeek={onSeek}
-          onReset={onReset}
-        />
-      </div>
-
-      <div className="control-section">
-        <h2>Annotations</h2>
-        <label className="toggle-option">
-          <input
-            type="checkbox"
-            checked={isDrawMode}
-            onChange={onToggleDrawMode}
-          />
-          <span>Draw Mode {isDrawMode && '✏️'}</span>
-        </label>
-        
-        {drawnPathsCount > 0 && (
-          <div className="drawing-controls">
-            <button onClick={onUndoDrawing} className="control-btn">
-              ↶ Undo
+      {/* Playback Controls Section */}
+      <div className="control-section playback-section">
+        <h2 className="section-title">Playback Controls</h2>
+        <div className="playback-content">
+          <div className="playback-buttons">
+            <button 
+              className="playback-btn reset-btn"
+              onClick={onReset}
+              title="Reset playback"
+            >
+              <img src={imgReset} alt="Reset" className="btn-icon" />
+              <span>reset</span>
             </button>
-            <button onClick={onClearDrawings} className="control-btn">
-              🗑 Clear All ({drawnPathsCount})
+            <button 
+              className="playback-btn play-btn"
+              onClick={onTogglePlay}
+              title={isPlaying ? "Pause" : "Play"}
+            >
+              <img src={imgPlay} alt={isPlaying ? "Pause" : "Play"} className="btn-icon" />
+              <span>{isPlaying ? 'pause' : 'play'}</span>
             </button>
           </div>
-        )}
+          <PlaybackControls
+            isPlaying={isPlaying}
+            currentTime={currentTime}
+            onTogglePlay={onTogglePlay}
+            onSeek={onSeek}
+            onReset={onReset}
+          />
+        </div>
+      </div>
+
+      {/* Annotations Section */}
+      <div className="control-section annotations-section">
+        <h2 className="section-title">Annotations</h2>
+        <div className="annotations-content">
+          <button 
+            className={`tool-btn pencil-btn ${isDrawMode || hoveredTool === 'pencil' ? 'active' : ''}`}
+            onClick={onToggleDrawMode}
+            onMouseEnter={() => setHoveredTool('pencil')}
+            onMouseLeave={() => setHoveredTool(null)}
+            title="Draw on map"
+          >
+            <img src={imgPencil} alt="Pencil" />
+          </button>
+          <button 
+            className={`tool-btn erase-btn ${hoveredTool === 'erase' ? 'active' : ''}`}
+            onMouseEnter={() => setHoveredTool('erase')}
+            onMouseLeave={() => setHoveredTool(null)}
+            title="Erase drawings"
+          >
+            <img src={imgErase} alt="Erase" />
+          </button>
+          <button 
+            className={`tool-btn trash-btn ${hoveredTool === 'trash' ? 'active' : ''}`}
+            onClick={onClearDrawings}
+            onMouseEnter={() => setHoveredTool('trash')}
+            onMouseLeave={() => setHoveredTool(null)}
+            title="Clear all drawings"
+          >
+            <img src={imgTrash} alt="Trash" />
+          </button>
+          <button 
+            className={`tool-btn undo-btn ${hoveredTool === 'undo' ? 'active' : ''}`}
+            onClick={onUndoDrawing}
+            onMouseEnter={() => setHoveredTool('undo')}
+            onMouseLeave={() => setHoveredTool(null)}
+            title="Undo last drawing"
+          >
+            <img src={imgUndo} alt="Undo" />
+          </button>
+          <button 
+            className={`tool-btn redo-btn ${hoveredTool === 'redo' ? 'active' : ''}`}
+            onMouseEnter={() => setHoveredTool('redo')}
+            onMouseLeave={() => setHoveredTool(null)}
+            title="Redo last undo"
+          >
+            <img src={imgUndo} alt="Redo" style={{ transform: 'scaleX(-1)' }} />
+          </button>
+        </div>
       </div>
     </div>
   );

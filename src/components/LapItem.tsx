@@ -1,6 +1,9 @@
 import type { Lap } from '../types';
 import './LapItem.css';
 
+// Icon import
+const imgCheckedCheckbox = "../../public/icons/checked-checkbox.png";
+
 interface LapItemProps {
   lap: Lap;
   isVisible: boolean;
@@ -13,12 +16,16 @@ export function LapItem({ lap, isVisible, onToggle }: LapItemProps) {
       className={`lap-item ${!isVisible ? 'lap-hidden' : ''}`}
       onClick={onToggle}
     >
-      <input
-        type="checkbox"
-        checked={isVisible}
-        onChange={onToggle}
-        onClick={(e) => e.stopPropagation()}
-      />
+      <button
+        className="lap-checkbox"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
+        title={`Toggle visibility for ${lap.name}`}
+      >
+        {/* <img src={imgCheckedCheckbox} alt="checkbox" /> */}
+      </button>
       <div 
         className="lap-color" 
         style={{ backgroundColor: lap.color }}

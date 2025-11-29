@@ -19,6 +19,9 @@ import type { Lap } from '../types';
 import { LapItem } from './LapItem';
 import './DriverSection.css';
 
+// Icon import
+const imgCheckedCheckbox = "../../public/icons/Checked Checkbox.png";
+
 interface DriverSectionProps {
   driver: string;
   laps: Lap[];
@@ -40,14 +43,13 @@ export function DriverSection({
   return (
     <div className="driver-section">
       <div className="driver-header">
-        <input
-          type="checkbox"
-          checked={allVisible}
-          ref={input => {
-            if (input) input.indeterminate = someVisible && !allVisible;
-          }}
-          onChange={() => onToggleDriver(driver)}
-        />
+        <button
+          className="driver-checkbox"
+          onClick={() => onToggleDriver(driver)}
+          title={`Toggle all laps for ${driver}`}
+        >
+          <img src={imgCheckedCheckbox} alt="checkbox" />
+        </button>
         <h3 className="driver-name">{driver}</h3>
       </div>
       

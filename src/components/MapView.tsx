@@ -1,4 +1,5 @@
-import { MapContainer, TileLayer, Polyline, CircleMarker } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker, useMap } from 'react-leaflet';
+import { useEffect } from 'react';
 import type { Lap, GpxPoint } from '../types';
 import { getSpeedRange, getSpeedColor } from '../utils/speedColor';
 import { SpeedLegend } from './SpeedLegend';
@@ -28,6 +29,32 @@ function getPointAtTime(lap: Lap, timePercentage: number): GpxPoint | null {
   return lap.points[index];
 }
 
+// Component that handles map resizing when container changes
+function MapResizeHandler() {
+  const map = useMap();
+
+  useEffect(() => {
+    // Small delay to ensure DOM has settled
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+
+    // Also handle window resize events
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
+
+  return null;
+}
+
 export function MapView({ laps, showHeatmap, currentTime, isDrawMode, drawnPaths, onPathComplete }: MapViewProps) {
   if (laps.length === 0) {
     return <div className="map-loading">No data to display</div>;
@@ -49,6 +76,7 @@ export function MapView({ laps, showHeatmap, currentTime, isDrawMode, drawnPaths
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
+          <MapResizeHandler />
           
           {laps.map(lap => {
             if (showHeatmap) {

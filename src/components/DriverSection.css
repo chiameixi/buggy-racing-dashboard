@@ -1,31 +1,49 @@
 .driver-section {
-  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
 .driver-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding: 4px 0;
+  gap: 6px;
+  padding: 0;
 }
 
-.driver-header input[type="checkbox"] {
+.driver-checkbox {
+  width: 30px;
+  height: 30px;
   cursor: pointer;
-  width: 16px;
-  height: 16px;
+  background: none;
+  border: none;
+  padding: 0;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.driver-checkbox:hover {
+  opacity: 0.8;
+}
+
+.driver-checkbox img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .driver-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
+  font-family: 'Roboto Flex', system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #000;
   margin: 0;
+  flex: 1;
 }
 
 .lap-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-left: 24px;
+  gap: 7px;
+  padding-left: 30px;
 }

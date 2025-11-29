@@ -1,56 +1,76 @@
 .lap-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
   padding: 10px;
   background: white;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
+  border: 2px solid #ef8354;
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.2s;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  width: 100%;
 }
 
 .lap-item:hover {
-  background: #f9fafb;
+  background: #f5f5f5;
 }
 
 .lap-item.lap-hidden {
   opacity: 0.5;
 }
 
-.lap-item input[type="checkbox"] {
+/* .lap-checkbox {
+  width: 30px;
+  height: 30px;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+  transition: opacity 0.2s;
+} */
+
+.lap-checkbox:hover {
+  opacity: 0.8;
 }
 
+/* .lap-checkbox img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+} */
+
 .lap-color {
-  width: 16px;
-  height: 16px;
-  border-radius: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
   flex-shrink: 0;
 }
 
 .lap-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
   flex: 1;
   min-width: 0;
 }
 
 .lap-name {
-  font-size: 14px;
-  color: #111827;
-  font-weight: 500;
+  font-family: 'Roboto Flex', system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #000;
+  margin: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
 .lap-date {
-  font-size: 12px;
-  color: #6b7280;
+  font-family: 'Roboto Flex', system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #323232;
+  margin: 0;
 }
