@@ -1,31 +1,56 @@
 /**
  * TelemetryDisplay.tsx
  * 
- * small thing to display telemetry data (speed, elevation, time, position) for the current point.
- * Uses currentPoint prop to show data.
+ * Displays real-time telemetry data (speed, elevation, time) for the current playback point.
+ * Shows data from the first visible lap, updating as playback progresses.
  */
-import type { GpxPoint } from '../types';
+import type { Lap } from '../types';
 import './TelemetryDisplay.css';
 
 interface TelemetryDisplayProps {
-  currentPoint: GpxPoint | null;
-};
+  visibleLaps: Lap[];
+  visibleLapIds: Set<string>;
+  currentTime: number; // percentage 0-100
+}
 
-export function TelemetryDisplay({ currentPoint }: TelemetryDisplayProps) {
+export function TelemetryDisplay({ visibleLaps, visibleLapIds, currentTime }: TelemetryDisplayProps) {
+  if (visibleLaps.length === 0) {
+    return (
+      <div className="telemetry-display">
+        <div className="telemetry-empty">No visible laps</div>
+      </div>
+    );
+  }
+
+  const firstLap = visibleLaps[0];
+  
+  // Check for consistency between visibleLapIds and rendered laps
+  if (!visibleLapIds.has(firstLap.id)) {
+    console.warn(`Discrepancy: Lap ${firstLap.id} is rendered but not in visibleLapIds`);
+  }
+
+  // Get the current point based on currentTime percentage
+  const pointIndex = Math.floor((currentTime / 100) * firstLap.points.length);
+  const currentPoint = firstLap.points[Math.min(pointIndex, firstLap.points.length - 1)];
+
   if (!currentPoint) {
     return (
       <div className="telemetry-display">
-        <div className="telemetry-title">Telemetry</div>
         <div className="telemetry-empty">No data</div>
       </div>
     );
   }
 
   const speedMph = currentPoint.speed ? (currentPoint.speed * 2.237).toFixed(1) : 'N/A';
-  const speedMs = currentPoint.speed ? currentPoint.speed.toFixed(2) : 'N/A';
   const elevation = currentPoint.elevation ? currentPoint.elevation.toFixed(1) : 'N/A';
   
-  // Format timestamp
+  // Calculate max speed in the lap
+  const maxSpeed = firstLap.points.reduce((max, point) => {
+    return point.speed ? Math.max(max, point.speed) : max;
+  }, 0);
+  const maxSpeedMph = (maxSpeed * 2.237).toFixed(1);
+  
+  // Format timestamp as HH:MM:SS AM/PM
   const timeStr = currentPoint.time.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
@@ -34,33 +59,30 @@ export function TelemetryDisplay({ currentPoint }: TelemetryDisplayProps) {
 
   return (
     <div className="telemetry-display">
-      <div className="telemetry-title">Telemetry</div>
+      <div className="telemetry-heading">
+        <span className="lap-name">{firstLap.name}</span>
+        <span className="lap-date">{firstLap.date}</span>
+      </div>
+      <div className="telemetry-divider"></div>
       
       <div className="telemetry-row">
-        <span className="telemetry-label">Speed:</span>
+        <span className="telemetry-label">Speed</span>
         <span className="telemetry-value">{speedMph} mph</span>
       </div>
       
-      <div className="telemetry-row secondary">
-        <span className="telemetry-label"></span>
-        <span className="telemetry-value">{speedMs} m/s</span>
+      <div className="telemetry-row">
+        <span className="telemetry-label">Max Speed</span>
+        <span className="telemetry-value">{maxSpeedMph} mph</span>
       </div>
       
       <div className="telemetry-row">
-        <span className="telemetry-label">Elevation:</span>
+        <span className="telemetry-label">Elevation</span>
         <span className="telemetry-value">{elevation} m</span>
       </div>
       
       <div className="telemetry-row">
-        <span className="telemetry-label">Time:</span>
+        <span className="telemetry-label">Time</span>
         <span className="telemetry-value">{timeStr}</span>
-      </div>
-      
-      <div className="telemetry-row">
-        <span className="telemetry-label">Position:</span>
-        <span className="telemetry-value coords">
-          {currentPoint.lat.toFixed(5)}, {currentPoint.lon.toFixed(5)}
-        </span>
       </div>
     </div>
   );

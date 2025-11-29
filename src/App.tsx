@@ -75,6 +75,7 @@ function App() {
           {!loading && !error && 
           <MapView 
             laps={visibleLaps} 
+            visibleLapIds={visibleLapIds}
             showHeatmap={showHeatmap} 
             currentTime={currentTime} 
             isDrawMode={isDrawMode}

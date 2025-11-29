@@ -10,6 +10,7 @@ import './MapView.css';
 
 interface MapViewProps {
   laps: Lap[];
+  visibleLapIds: Set<string>;
   showHeatmap?: boolean;
   currentTime: number; // percentage of playback progress 0-100
   isDrawMode: boolean;
@@ -55,7 +56,7 @@ function MapResizeHandler() {
   return null;
 }
 
-export function MapView({ laps, showHeatmap, currentTime, isDrawMode, drawnPaths, onPathComplete }: MapViewProps) {
+export function MapView({ laps, visibleLapIds, showHeatmap, currentTime, isDrawMode, drawnPaths, onPathComplete }: MapViewProps) {
   if (laps.length === 0) {
     return <div className="map-loading">No data to display</div>;
   }
@@ -65,7 +66,6 @@ export function MapView({ laps, showHeatmap, currentTime, isDrawMode, drawnPaths
   const center = [firstLap.points[0].lat, firstLap.points[0].lon] as [number, number];
 
   const {min, max} = getSpeedRange(laps);
-  const currentPoint = getPointAtTime(firstLap, currentTime);
 
   console.log(`Speed range across all laps: min=${min?.toFixed(2)} m/s, max=${max?.toFixed(2)} m/s`);
 
@@ -140,7 +140,7 @@ export function MapView({ laps, showHeatmap, currentTime, isDrawMode, drawnPaths
           }
         </MapContainer>
 
-        <TelemetryDisplay currentPoint={currentPoint} />
+        <TelemetryDisplay visibleLaps={laps} visibleLapIds={visibleLapIds} currentTime={currentTime} />
         
         {showHeatmap && <SpeedLegend minSpeed={min} maxSpeed={max} />}
       </div>
