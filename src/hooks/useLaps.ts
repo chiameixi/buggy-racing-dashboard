@@ -31,15 +31,13 @@ export function useLaps() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  //drawing 
-  // const [isDrawMode, setIsDrawMode] = useState(false);
-  // const [drawnPaths, setDrawnPaths] = useState<Array<{id: string, points: [number, number][]}>>([]);
-
   const [isDrawMode, setIsDrawMode] = useState(false);
-  const [activeTool, setActiveTool] = useState<'pencil' | 'erase' | null>(null);
+  const [activeTool, setActiveTool] = useState<'pencil' | 'erase' | 'marker' | null>(null);
+  const [selectedMarkerType, setSelectedMarkerType] = useState<'tree' | 'flag' | 'stop' |  'generic'>('generic');
 
   const drawingLayerRef = useRef<DrawingLayerHandle>(null);
 
+  // for now, hardcode GPX file configs here. future improvement: could be dynamic or from server.
   useEffect(() => {
     const gpxFiles: GpxFileConfig[] = [
       { 
@@ -141,7 +139,7 @@ export function useLaps() {
   };
 
   // toggle heatmap display
-  const toggleHeatmap = () => {  // ADD THIS
+  const toggleHeatmap = () => { 
     setShowHeatmap(prev => !prev);
   };
 
@@ -160,28 +158,6 @@ export function useLaps() {
     setCurrentTime(0);
   }
 
-  // drawing toggles 
-  // const toggleDrawMode = () => {
-  //   setIsDrawMode(prev => !prev);
-  // }
-
-  // // add a new drawn path 
-  // // representation: array of lat/lon points
-  // const addDrawnPath = (points: [number, number][]) => {
-  //   const newPath = {
-  //     id: `path-${Date.now()}`,
-  //     points
-  //   };
-  //   setDrawnPaths(prev => [...prev, newPath]);
-  // };
-
-  // const clearAllDrawings = () => {
-  //   setDrawnPaths([]);
-  // };
-
-  // const undoLastDrawing = () => {
-  //   setDrawnPaths(prev => prev.slice(0, -1));
-  // };
 
   const setPencilTool = useCallback(() => {
     console.log('setPencilTool called, current activeTool:', activeTool);
@@ -203,7 +179,14 @@ export function useLaps() {
     }
   }, [activeTool]);
 
+  const setMarkerTool = useCallback(() => {
+    console.log('setMarkerTool called, current activeTool:', activeTool);
+    const newTool = activeTool === 'marker' ? null : 'marker';
+    setActiveTool(newTool);
+    setIsDrawMode(newTool !== null);
+  }, [activeTool]);
 
+  // drawing layer interactions
   const undoLastDrawing = useCallback(() => {
     drawingLayerRef.current?.undo();
   }, []);
@@ -253,6 +236,9 @@ export function useLaps() {
     activeTool,
     setPencilTool,
     setEraseTool,
+    setMarkerTool,
+    selectedMarkerType,
+    setSelectedMarkerType,
     drawingLayerRef,
     // drawnPaths,
     // toggleDrawMode,

@@ -15,7 +15,8 @@ import L from 'leaflet';
 
 interface DrawingLayerProps {
   isDrawMode: boolean;
-  activeTool: 'pencil' | 'erase' | null;  // ADD: support for erase mode
+  activeTool: 'pencil' | 'erase' | 'marker'| null;  
+  selectedMarkerType: 'tree' | 'flag' | 'stop' | 'generic'; 
   onCommandsChange?: (commands: DrawCommand[]) => void;
 }
 
@@ -26,13 +27,13 @@ export interface DrawingLayerHandle {
 }
 
 export const DrawingLayer = forwardRef<DrawingLayerHandle, DrawingLayerProps>(
-  ({ isDrawMode, activeTool, onCommandsChange }, ref) => {
+  ({ isDrawMode, activeTool, selectedMarkerType, onCommandsChange }, ref) => {
     const map = useMap();
     const isDrawingRef = useRef(false);
     const currentPathRef = useRef<[number, number][]>([]);
     const drawnLayersRef = useRef<Map<string, L.Polyline>>(new Map());
 
-    const { commands, currentIndex, addDrawCommand, addEraseCommand, undo, redo, clearAll } = 
+    const { commands, currentIndex, addDrawCommand, addEraseCommand, addMarkerCommand, undo, redo, clearAll } = 
       useDrawingHistoryLeaflet();
 
     // Expose methods via ref
@@ -58,13 +59,36 @@ export const DrawingLayer = forwardRef<DrawingLayerHandle, DrawingLayerProps>(
           erasedIds.add(cmd.id);
         }
       }
-
+     
       // Replay commands up to currentIndex but skip erased ones
       for (let i = 0; i <= currentIndex; i++) {
         const cmd = commands[i];
         if (!cmd) continue;
 
-        if (cmd.type === 'draw' && !erasedIds.has(cmd.id)) {
+        // markers
+
+        else if (cmd.type === 'marker' && !erasedIds.has(cmd.id)) {
+        // define the file extensions for each marker type
+          const iconFiles = {
+            tree: '/icons/Tree.png',
+            flag: '/icons/Flag.svg',
+            stop: '/icons/Stop.png',
+            generic: '/buggy.svg'
+          };
+          
+          // create icon based on marker type
+          const icon = L.icon({
+            iconUrl: iconFiles[cmd.markerType],
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+          });
+          
+          const marker = L.marker(cmd.position, { icon }).addTo(map);
+          drawnLayersRef.current.set(cmd.id, marker as any);
+        }
+
+        else if (cmd.type === 'draw' && !erasedIds.has(cmd.id)) {
           const polyline = L.polyline(cmd.points, {
             color: '#ff6b00',
             weight: 3,
@@ -73,12 +97,9 @@ export const DrawingLayer = forwardRef<DrawingLayerHandle, DrawingLayerProps>(
           
           drawnLayersRef.current.set(cmd.id, polyline);
         }
-        // } else if (cmd.type === 'erase') {
-        //   // Don't draw erased polylines
-        //   drawnLayersRef.current.delete(cmd.id);
-        // }
+      
       }
-    }, [commands, currentIndex, map]);
+    }, [commands, currentIndex, map, selectedMarkerType]);
 
     // Rebuild on command history change
     useEffect(() => {
@@ -99,43 +120,90 @@ export const DrawingLayer = forwardRef<DrawingLayerHandle, DrawingLayerProps>(
           console.log('Number of drawn layers:', drawnLayersRef.current.size);
           console.log('Drawn layer IDs:', Array.from(drawnLayersRef.current.keys()));
           
-          for (const [id, polyline] of drawnLayersRef.current.entries()) {
-            // Check if click is near polyline (simple distance check)
-            console.log('Checking polyline id:', id);
-            const latlng = e.latlng;
+          const mouseLatLng = e.latlng;
+          const eraseThreshold = 20; //meters
 
-            const distance = (p1: L.LatLng, p2: L.LatLng) => {
-              const R = 6371; // Earth radius in km
-              const dLat = (p2.lat - p1.lat) * Math.PI / 180;
-              const dLng = (p2.lng - p1.lng) * Math.PI / 180;
-              const a = 
-                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(p1.lat * Math.PI / 180) * Math.cos(p2.lat * Math.PI / 180) *
-                Math.sin(dLng / 2) * Math.sin(dLng / 2);
-              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-              return R * c * 1000; // meters
-            };
+          for (const [id, layer] of drawnLayersRef.current.entries()) {
+            // check if click is polyline or marker 
+            if (layer instanceof L.Marker) {
+              const markerLatLng = layer.getLatLng();
+              const dist = mouseLatLng.distanceTo(markerLatLng);
 
-            // Check distance to polyline points
-            const points = polyline.getLatLngs() as L.LatLng[];
-            console.log(`Polyline ${id} has ${points.length} points`);
+              console.log(`Marker ${id} distance: ${dist.toFixed(2)}m`);
+              
+              if (dist < eraseThreshold) {
+                console.log(`Erasing marker ${id}`);
+                addEraseCommand(id);
+                return;
+              }
 
-            let minDist = Infinity;
-            for (const pt of points) {
-              minDist = Math.min(minDist, distance(latlng, pt));
+              console.log('marker kinda far');
             }
 
-            console.log(`Min distance to polyline ${id}: ${minDist.toFixed(2)}m`);
+            else if (layer instanceof L.Polyline) {
+              const points = layer.getLatLngs() as L.LatLng[];
+              let minDist = Infinity;
 
-            // If within 10 meters, erase it
-            if (minDist < 10) {
-              console.log(`Erasing polyline ${id}`);
-              addEraseCommand(id);
-              return;
+              for (const pt of points) {
+                const dist = mouseLatLng.distanceTo(pt)
+                minDist = Math.min(minDist, dist);
+              }            
+
+              if (minDist < eraseThreshold) {
+                console.log(`erasing polykine ${id}`);
+                addEraseCommand(id);
+                return;
+              }
+
             }
           }
+        
+            // console.log('Checking polyline id:', id);
+            // const latlng = e.latlng;
 
-          console.log('No polyline found within 10m of click');
+            // // Haversine formula to calculate distance between two latlngs
+            // import from utils/gpxParser.ts and replace with that function - TO DO
+            // const distance = (p1: L.LatLng, p2: L.LatLng) => {
+            //   const R = 6371; // Earth radius in km
+            //   const dLat = (p2.lat - p1.lat) * Math.PI / 180;
+            //   const dLng = (p2.lng - p1.lng) * Math.PI / 180;
+            //   const a = 
+            //     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            //     Math.cos(p1.lat * Math.PI / 180) * Math.cos(p2.lat * Math.PI / 180) *
+            //     Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            //   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            //   return R * c * 1000; // meters
+            // };
+
+            // Check distance to polyline points
+            // const points = polyline.getLatLngs() as L.LatLng[];
+            // console.log(`Polyline ${id} has ${points.length} points`);
+
+            // let minDist = Infinity;
+            // for (const pt of points) {
+            //   minDist = Math.min(minDist, distance(latlng, pt));
+            // }
+
+            // console.log(`Min distance to polyline ${id}: ${minDist.toFixed(2)}m`);
+
+            // // If within 10 meters, erase it
+            // if (minDist < 10) {
+            //   console.log(`Erasing polyline ${id}`);
+            //   addEraseCommand(id);
+            //   return;
+          //   }
+          // }
+
+          // console.log('No polyline found within 10m of click');
+          // return;
+        }
+
+        if (activeTool === 'marker') {
+          console.log('marker mode - adding marker');
+
+          const id = Date.now().toString();
+          const position: [number, number] = [e.latlng.lat, e.latlng.lng];
+          addMarkerCommand(id, position, selectedMarkerType); 
           return;
         }
 
@@ -150,6 +218,7 @@ export const DrawingLayer = forwardRef<DrawingLayerHandle, DrawingLayerProps>(
         isDrawingRef.current = true;
         currentPathRef.current = [[e.latlng.lat, e.latlng.lng]];
       },
+
 
       mousemove: (e) => {
         if (!isDrawMode || !isDrawingRef.current || activeTool !== 'pencil') return;
@@ -195,6 +264,7 @@ export const DrawingLayer = forwardRef<DrawingLayerHandle, DrawingLayerProps>(
     });
 
     // Update cursor based on tool
+    // if the user is currently drawing, they should not be able to drag the map around
     useEffect(() => {
       if (activeTool === 'pencil') {
         map.getContainer().style.cursor = 'crosshair';
@@ -202,175 +272,17 @@ export const DrawingLayer = forwardRef<DrawingLayerHandle, DrawingLayerProps>(
       } else if (activeTool === 'erase') {
         map.getContainer().style.cursor = 'grab';
         map.dragging.disable();
+      } else if (activeTool === 'marker') {
+        map.getContainer().style.cursor = 'pointer';
+        map.dragging.disable();
       } else {
         map.getContainer().style.cursor = '';
         map.dragging.enable();
       }
-    }, [activeTool, map]);
+    }, [activeTool, selectedMarkerType, map]);
 
     return null;
   }
 );
 
 DrawingLayer.displayName = 'DrawingLayer';
-
-// interface DrawingLayerProps {
-//   isDrawMode: boolean;
-//   // activeTool: 'draw' | 'erase' | null;
-//   // onCommandsChange?: (commands: DrawCommand[]) => void;
-//   drawnPaths: Array<{ id: string; points: [number, number][] }>;
-//   onPathComplete: (points: [number, number][]) => void;
-// };
-
-// // export interface DrawingLayerHandle {
-// //   undo: () => void;
-// //   redo: () => void;
-// //   clearAll: () => void;
-// // }
-
-// // export const DrawingLayerHandle = forwardRef<DrawingLayerHandle, DrawingLayerProps>(
-// //   ({ isDrawMode, activeTool, onCommandsChange }, ref) => {
-
-// //     const map = useMap();
-// //     const isDrawingRef = useRef(false);
-// //     const currentPathRef = useRef<[number, number][]>([]);
-// //     const drawnLayersRef = useRef<Map<string, L.Polyline>>(new Map());
-
-// //     const { commands, currIdx, addCommand, undo, redo, clearAll } = useDrawingHistoryLeaflet();
-  
-// //     // expose undo, redo, clearAll methods to parent via ref
-// //     useImperativeHandle(ref, () => ({
-// //       undo,
-// //       redo,
-// //       clearAll,
-// //     }), [undo, redo, clearAll]);
-      
-// //     // rebuild drawn layers whenever commands or currIdx change
-// //     const rebuildDrawnLayers = () => {
-// //       // Clear existing layers
-// //       drawnLayersRef.current.forEach(layer => layer.remove());
-// //       drawnLayersRef.current.clear();
-  
-// //       // Rebuild layers based on commands up to currIdx
-// //       for (let i = 0; i <= currIdx; i++) {
-// //         const command = commands[i];
-
-// //         if (!command) continue;
-
-// //         // draw or erase based on command type
-// //         if (command.type === 'draw') {
-// //           const polyline = L.polyline(command.points, {
-// //             color: '#ff6b00',
-// //             weight: 3,
-// //             opacity: 0.8
-// //           }).addTo(map);
-
-// //           drawnLayersRef.current.set(command.id, polyline);
-
-// //         } else if (command.type === 'erase') {
-// //           drawnLayersRef.current.delete(command.id);
-// //           // const layer = drawnLayersRef.current.get(command.id);
-
-// //           // if (layer) {
-// //           //   layer.remove();
-// //           //   drawnLayersRef.current.delete(command.id);
-// //           // }
-// //         }
-// //       }
-// //     }, [commands, currIdx, map]);
-
-// //     //rebuild based on commands/currIdx change
-// //     useEffect(() => {
-// //       rebuildDrawnLayers();
-// //       if (onCommandsChange) {
-// //         onCommandsChange(commands.slice(0, currIdx + 1));
-// //       }
-// //     }, [commands, currIdx, rebuildDrawnLayers, onCommandsChange]);
-
-// //     // Handle mouse events for drawing/erasing
-// //     useMapEvents({
-// //       mousedown: (e) => {
-// //         if (!isDrawMode) return;
-        
-// //         if (activeTool === 'erase') {
-// //           // Check if clicked near any drawn polyline
-// //   }
-// // );
-
-// export function DrawingLayer({ isDrawMode, drawnPaths, onPathComplete }: DrawingLayerProps) {
-//   const map = useMap();
-//   const isDrawingRef = useRef(false);
-//   const currentPathRef = useRef<[number, number][]>([]);
-//   const drawnLayersRef = useRef<L.Polyline[]>([]);
-
-//   // Handle mouse events for drawing
-//   useMapEvents({
-//     mousedown: (e) => {
-//       if (!isDrawMode) return;
-      
-//       isDrawingRef.current = true;
-//       currentPathRef.current = [[e.latlng.lat, e.latlng.lng]];
-//     },
-//     mousemove: (e) => {
-//       if (!isDrawMode || !isDrawingRef.current) return;
-      
-//       currentPathRef.current.push([e.latlng.lat, e.latlng.lng]);
-      
-//       // Draw temporary line as user draws
-//       const tempLayer = L.polyline(currentPathRef.current, {
-//         color: '#ff6b00',
-//         weight: 3,
-//         opacity: 0.8
-//       }).addTo(map);
-      
-//       // Remove it immediately (we'll redraw constantly for smoothness)
-//       setTimeout(() => tempLayer.remove(), 50);
-//     },
-//     mouseup: () => {
-//       if (!isDrawMode || !isDrawingRef.current) return;
-      
-//       isDrawingRef.current = false;
-      
-//       if (currentPathRef.current.length > 1) {
-//         onPathComplete([...currentPathRef.current]);
-//       }
-      
-//       currentPathRef.current = [];
-//     }
-//   });
-
-//   // Render all drawn paths
-//   useEffect(() => {
-//     // Clear previous layers
-//     drawnLayersRef.current.forEach(layer => layer.remove());
-//     drawnLayersRef.current = [];
-
-//     // Draw all paths
-//     drawnPaths.forEach(path => {
-//       const polyline = L.polyline(path.points, {
-//         color: '#ff6b00',
-//         weight: 3,
-//         opacity: 0.8
-//       }).addTo(map);
-      
-//       drawnLayersRef.current.push(polyline);
-//     });
-
-//     return () => {
-//       drawnLayersRef.current.forEach(layer => layer.remove());
-//     };
-//   }, [drawnPaths, map]);
-
-//   // Change cursor when in draw mode
-//   useEffect(() => {
-//     if (isDrawMode) {
-//       map.getContainer().style.cursor = 'crosshair';
-//       map.dragging.disable();
-//     } else {
-//       map.getContainer().style.cursor = '';
-//       map.dragging.enable();
-//     }
-//   }, [isDrawMode, map]);
-
-//   return null;
-// }

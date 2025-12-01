@@ -10,7 +10,7 @@ import GPXParser from 'gpxparser';
 import type { GpxPoint } from '../types';
 
 // use Haversine formula to calculate distance between two lat/lon points
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371e3; // earth radius in meters
   const φ1 = lat1 * Math.PI / 180;
   const φ2 = lat2 * Math.PI / 180;

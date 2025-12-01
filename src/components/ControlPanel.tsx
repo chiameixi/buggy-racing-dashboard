@@ -21,7 +21,7 @@ import { PlaybackControls } from './PlaybackControls';
 import './ControlPanel.css';
 
 // Icon imports
-const imgCheckedCheckbox = "../../public/icons/Checked Checkbox.png";
+// const imgCheckedCheckbox = "../../public/icons/Checked Checkbox.png";
 const imgPlay = "../../public/icons/Play.png";
 const imgReset = "../../public/icons/Reset.png";
 const imgPencil = "../../public/icons/Pencil.png";
@@ -29,6 +29,10 @@ const imgErase = "../../public/icons/Erase.png";
 const imgTrash = "../../public/icons/Trash.png";
 const imgUndo = "../../public/icons/Undo.png";
 const imgPause = "../../public/icons/Pause.png";
+const imgMarker = "../../public/buggy.svg";
+const imgTree = "../../public/icons/Tree.png";
+const imgFlag = "../../public/icons/Flag.svg";
+const imgStop = "../../public/icons/Stop.png";
 
 interface ControlPanelProps {
   laps: Lap[];
@@ -38,7 +42,8 @@ interface ControlPanelProps {
   currentTime: number;
   playbackSpeed: number;
   isDrawMode: boolean;
-  activeTool: 'pencil' | 'erase' | null;
+  activeTool: 'pencil' | 'erase' | 'marker' | null;
+  selectedMarkerType: 'tree' | 'flag' | 'stop'| 'generic';
   // drawnPathsCount: number;
   onToggleLap: (lapId: string) => void;
   onToggleDriver: (driver: string) => void;
@@ -48,6 +53,8 @@ interface ControlPanelProps {
   onReset: () => void;
   onSetPencilTool: () => void;
   onSetEraseTool: () => void;
+  onSetMarkerTool: () => void;
+  onSetMarkerType: (markerType: 'tree' | 'flag' | 'stop' | 'generic') => void;
   // onToggleDrawMode: () => void;
   onClearDrawings: () => void;
   onUndoDrawing: () => void;
@@ -71,6 +78,9 @@ export function ControlPanel({
   // onToggleDrawMode,
   onSetPencilTool,
   onSetEraseTool,
+  onSetMarkerTool,
+  onSetMarkerType,
+  selectedMarkerType,
   onClearDrawings,
   onUndoDrawing,
   onRedoDrawing
@@ -154,6 +164,8 @@ export function ControlPanel({
         onMouseLeave={() => setHoveredTool(null)}
       >
         <h2 className="section-title">Annotations</h2>
+
+        {/* Main tools */}
         <div className="annotations-content">
           <button 
             className={`tool-btn pencil-btn ${activeTool === 'pencil' ? 'active': ''} ${hoveredTool === 'pencil' ? 'hovered' : ''}`}
@@ -201,6 +213,60 @@ export function ControlPanel({
             <img src={imgUndo} alt="Redo" style={{ transform: 'scaleX(-1)' }} />
           </button>
         </div>
+
+       {/* Marker tools row */}
+        <div className="annotations-content marker-row">
+          <button 
+            className={`tool-btn ${activeTool === 'marker' && selectedMarkerType === 'tree' ? 'active' : ''} ${hoveredTool === 'tree' ? 'hovered' : ''}`}
+            onClick={() => {
+              onSetMarkerTool();
+              onSetMarkerType('tree');
+            }}
+            onMouseEnter={() => setHoveredTool('tree')}
+            onMouseLeave={() => setHoveredTool(null)}
+            title="Add tree marker"
+          >
+            <img src={imgTree} alt="Tree" />
+          </button>
+
+          <button 
+            className={`tool-btn ${activeTool === 'marker' && selectedMarkerType === 'flag' ? 'active' : ''} ${hoveredTool === 'flag' ? 'hovered' : ''}`}
+            onClick={() => {
+              onSetMarkerTool();
+              onSetMarkerType('flag');
+            }}
+            onMouseEnter={() => setHoveredTool('flag')}
+            onMouseLeave={() => setHoveredTool(null)}
+            title="Add flag marker"
+          >
+            <img src={imgFlag} alt="Flag" />
+          </button>
+
+          <button 
+            className={`tool-btn ${activeTool === 'marker' && selectedMarkerType === 'stop' ? 'active' : ''} ${hoveredTool === 'stop' ? 'hovered' : ''}`}
+            onClick={() => {
+              onSetMarkerTool();
+              onSetMarkerType('stop');
+            }}
+            onMouseEnter={() => setHoveredTool('stop')}
+            onMouseLeave={() => setHoveredTool(null)}
+            title="Add stop marker"
+          >
+            <img src={imgStop} alt="Stop" />
+          </button>
+          <button 
+            className={`tool-btn ${activeTool === 'marker' && selectedMarkerType === 'generic' ? 'active' : ''} ${hoveredTool === 'generic' ? 'hovered' : ''}`}
+            onClick={() => {
+              onSetMarkerTool();
+              onSetMarkerType('generic');
+            }}
+            onMouseEnter={() => setHoveredTool('generic')}
+            onMouseLeave={() => setHoveredTool(null)}
+            title="Add marker"
+          >
+            <img src={imgMarker} alt="Marker" />
+          </button>
+      </div>
       </div>
     </div>
   );
