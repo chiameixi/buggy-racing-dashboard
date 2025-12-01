@@ -6,9 +6,10 @@
  *         and functions to toggle visibility of laps and drivers. 
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Lap } from '../types';
 import { parseGpxFile } from '../utils/gpxParser';
+import type { DrawingLayerHandle } from '../components/DrawingLayer';
 
 type GpxFileConfig = {
   name: string;
@@ -31,8 +32,13 @@ export function useLaps() {
   const [error, setError] = useState<string | null>(null);
 
   //drawing 
+  // const [isDrawMode, setIsDrawMode] = useState(false);
+  // const [drawnPaths, setDrawnPaths] = useState<Array<{id: string, points: [number, number][]}>>([]);
+
   const [isDrawMode, setIsDrawMode] = useState(false);
-  const [drawnPaths, setDrawnPaths] = useState<Array<{id: string, points: [number, number][]}>>([]);
+  const [activeTool, setActiveTool] = useState<'pencil' | 'erase' | null>(null);
+
+  const drawingLayerRef = useRef<DrawingLayerHandle>(null);
 
   useEffect(() => {
     const gpxFiles: GpxFileConfig[] = [
@@ -155,27 +161,62 @@ export function useLaps() {
   }
 
   // drawing toggles 
-  const toggleDrawMode = () => {
-    setIsDrawMode(prev => !prev);
-  }
+  // const toggleDrawMode = () => {
+  //   setIsDrawMode(prev => !prev);
+  // }
 
-  // add a new drawn path 
-  // representation: array of lat/lon points
-  const addDrawnPath = (points: [number, number][]) => {
-    const newPath = {
-      id: `path-${Date.now()}`,
-      points
-    };
-    setDrawnPaths(prev => [...prev, newPath]);
-  };
+  // // add a new drawn path 
+  // // representation: array of lat/lon points
+  // const addDrawnPath = (points: [number, number][]) => {
+  //   const newPath = {
+  //     id: `path-${Date.now()}`,
+  //     points
+  //   };
+  //   setDrawnPaths(prev => [...prev, newPath]);
+  // };
 
-  const clearAllDrawings = () => {
-    setDrawnPaths([]);
-  };
+  // const clearAllDrawings = () => {
+  //   setDrawnPaths([]);
+  // };
 
-  const undoLastDrawing = () => {
-    setDrawnPaths(prev => prev.slice(0, -1));
-  };
+  // const undoLastDrawing = () => {
+  //   setDrawnPaths(prev => prev.slice(0, -1));
+  // };
+
+  const setPencilTool = useCallback(() => {
+    console.log('setPencilTool called, current activeTool:', activeTool);
+    setActiveTool(prev => prev === 'pencil' ? null : 'pencil');
+    if (activeTool !== 'pencil') {
+      setIsDrawMode(true);
+    } else {
+      setIsDrawMode(false);
+    }
+  }, [activeTool]);
+
+  const setEraseTool = useCallback(() => {
+    console.log('setEraseTool called, current activeTool:', activeTool);
+    setActiveTool(prev => prev === 'erase' ? null : 'erase');
+    if (activeTool !== 'erase') {
+      setIsDrawMode(true);
+    } else {
+      setIsDrawMode(false);
+    }
+  }, [activeTool]);
+
+
+  const undoLastDrawing = useCallback(() => {
+    drawingLayerRef.current?.undo();
+  }, []);
+
+  const redoLastDrawing = useCallback(() => {
+    console.log('redoLastDrawing called');
+    drawingLayerRef.current?.redo();
+  }, []);
+
+  const clearAllDrawings = useCallback(() => {
+    drawingLayerRef.current?.clearAll();
+  }, []);
+
   // animation loop to update current time based on playback speed
   useEffect(() => {
     if (!isPlaying) return;
@@ -209,11 +250,16 @@ export function useLaps() {
     currentTime,
     playbackSpeed,
     isDrawMode,
-    drawnPaths,
-    toggleDrawMode,
-    addDrawnPath,
+    activeTool,
+    setPencilTool,
+    setEraseTool,
+    drawingLayerRef,
+    // drawnPaths,
+    // toggleDrawMode,
+    // addDrawnPath,
     clearAllDrawings,
     undoLastDrawing,
+    redoLastDrawing,
     togglePlayback,
     setProgress,
     resetPlayback,

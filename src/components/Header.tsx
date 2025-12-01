@@ -4,6 +4,8 @@ interface HeaderProps {
   onToggleSidebar: () => void;
 }
 
+const imgLogo = "/buggy.svg";
+
 export function Header({ onToggleSidebar }: HeaderProps) {
   return (
     <header className="header">
@@ -21,7 +23,10 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         </button>
 
         {/* Title */}
+        
         <h1 className="header-title">Buggy Racing Dashboard</h1>
+        {/* <img src={imgLogo} alt="Buggy Logo" className="header-logo"/> */}
+        
 
         {/* Links Section */}
         <div className="header-links">
@@ -41,7 +46,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
             className="header-link"
           >
             <span className="link-text">about</span>
-            <img src="../../icons/External Link.png" alt = "link" className = "link-icon"/>
+            <img src="/buggy.svg" alt = "link" className = "link-icon"/>
           </a>
         </div>
       </div>

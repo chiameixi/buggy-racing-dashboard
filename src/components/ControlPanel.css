@@ -330,18 +330,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.1s ease-in-out;
   flex-shrink: 0;
 }
 
 .tool-btn:hover {
   background: rgba(255, 255, 255, 0.8);
+  background: #bff1ec;
+  border: 2px solid #6cbbb4;
 }
+
+/* .tool-btn.hovered {
+  background: rgba(255, 255, 255, 0.8);
+  /* background: #bff1ec; 
+  border: 2px solid #6cbbb4;
+} */
+
+/* 
+.tool-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+} */
+
 
 .tool-btn.active {
   background: #bff1ec;
   border: 2px solid #6cbbb4;
 }
+/* 
+.tool-btn.active:hover {
+  background-color: #ffd8b8; 
+  border: 2px solid #6cbbb4
+} */
 
 .tool-btn img {
   width: 30px;

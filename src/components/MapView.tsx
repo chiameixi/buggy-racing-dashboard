@@ -1,10 +1,17 @@
+/**
+ * MapView.tsx
+ * 
+ * Leaflet map view displaying GPS laps with options for heatmap and drawing.
+ * Shows playback marker and telemetry overlay.
+ * 
+ */
 import { MapContainer, TileLayer, Polyline, CircleMarker, useMap } from 'react-leaflet';
 import { useEffect } from 'react';
 import type { Lap, GpxPoint } from '../types';
 import { getSpeedRange, getSpeedColor } from '../utils/speedColor';
 import { SpeedLegend } from './SpeedLegend';
 import { TelemetryDisplay } from './TelemetryDisplay';
-import { DrawingLayer } from './DrawingLayer';
+import { DrawingLayer, type DrawingLayerHandle } from './DrawingLayer';
 import 'leaflet/dist/leaflet.css';
 import './MapView.css';
 
@@ -14,9 +21,13 @@ interface MapViewProps {
   showHeatmap?: boolean;
   currentTime: number; // percentage of playback progress 0-100
   isDrawMode: boolean;
-  drawnPaths: Array<{ id: string; points: [number, number][] }>; // array of drawn paths
-  onPathComplete: (points: [number, number][]) => void;
+  activeTool: 'pencil' | 'erase' | null;
+  drawingLayerRef: React.RefObject<DrawingLayerHandle| null>;
+  sidebarOpen?: boolean;
+  // drawnPaths: Array<{ id: string; points: [number, number][] }>; // array of drawn paths
+  // onPathComplete: (points: [number, number][]) => void;
 };
+
 
 // get point at specific time percentage in lap
 // take in lap + certain time percentage, return the GpxPoint at that time
@@ -31,16 +42,17 @@ function getPointAtTime(lap: Lap, timePercentage: number): GpxPoint | null {
 }
 
 // Component that handles map resizing when container changes
-function MapResizeHandler() {
+// take in sidebarOpen to trigger resize on change
+function MapResizeHandler({sidebarOpen}: {sidebarOpen?: boolean}) {
   const map = useMap();
 
   useEffect(() => {
-    // Small delay to ensure DOM has settled
+    // Small delay to ensure DOM has settled if not stuff might carsh
     const timer = setTimeout(() => {
       map.invalidateSize();
-    }, 100);
+    }, 80);
 
-    // Also handle window resize events
+    // handle window resize events
     const handleResize = () => {
       map.invalidateSize();
     };
@@ -51,12 +63,23 @@ function MapResizeHandler() {
       clearTimeout(timer);
       window.removeEventListener('resize', handleResize);
     };
-  }, [map]);
+  }, [map,sidebarOpen]);
 
   return null;
 }
 
-export function MapView({ laps, visibleLapIds, showHeatmap, currentTime, isDrawMode, drawnPaths, onPathComplete }: MapViewProps) {
+export function MapView({ 
+  laps, 
+  visibleLapIds, 
+  showHeatmap, 
+  currentTime, 
+  isDrawMode, 
+  activeTool,
+  drawingLayerRef,
+  sidebarOpen
+  // drawnPaths, 
+  // onPathComplete 
+}: MapViewProps) {
   if (laps.length === 0) {
     return <div className="map-loading">No data to display</div>;
   }
@@ -76,7 +99,7 @@ export function MapView({ laps, visibleLapIds, showHeatmap, currentTime, isDrawM
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
-          <MapResizeHandler />
+          <MapResizeHandler sidebarOpen = {sidebarOpen}/>
           
           {laps.map(lap => {
             if (showHeatmap) {
@@ -116,9 +139,11 @@ export function MapView({ laps, visibleLapIds, showHeatmap, currentTime, isDrawM
 
           {/* ]Drawing layer */}
           <DrawingLayer 
+            ref={drawingLayerRef}
+            activeTool={activeTool}
             isDrawMode={isDrawMode}
-            drawnPaths={drawnPaths}
-            onPathComplete={onPathComplete}
+            // drawnPaths={drawnPaths}
+            // onPathComplete={onPathComplete}
           />
 
           {/* Playback marker */}
@@ -146,26 +171,4 @@ export function MapView({ laps, visibleLapIds, showHeatmap, currentTime, isDrawM
       </div>
     );
   }
-  // return (
-  //   <MapContainer center={center} zoom={16} className="map-container">
-  //     <TileLayer
-  //       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-  //       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  //     />
-      
-  //     {laps.map(lap => {
-  //       const positions = lap.points.map(p => [p.lat, p.lon] as [number, number]);
-
-
-  //       return (
-  //         <Polyline 
-  //           key={lap.id}
-  //           positions={positions} 
-  //           color={lap.color} 
-  //           weight={3}
-  //         />
-  //       );
-  //     })}
-  //   </MapContainer>
-  // );
 

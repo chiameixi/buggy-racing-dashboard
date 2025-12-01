@@ -17,6 +17,13 @@
   gap: 16px;
 }
 
+/* buggy */
+.header-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 /* Menu Toggle Button - 3 horizontal lines */
 .header-menu-button {
   background: none;
@@ -67,6 +74,7 @@
   gap: 12px;
   align-items: center;
   margin-left: auto;
+  justify-content: center;
 }
 
 .header-link {
@@ -79,11 +87,14 @@
   font-size: 18px;
   font-weight: 400;
   transition: opacity 0.2s ease;
+  justify-content: center;
   padding: 8px 10px;
 }
 
 .header-link:hover {
   opacity: 0.8;
+  text-decoration: underline;
+
 }
 
 .link-text {

@@ -21,6 +21,7 @@ import './DriverSection.css';
 
 // Icon import
 const imgCheckedCheckbox = "../../public/icons/Checked Checkbox.png";
+const imgUncheckedCheckbox = "../../public/icons/Unchecked Checkbox.png";
 
 interface DriverSectionProps {
   driver: string;
@@ -48,7 +49,10 @@ export function DriverSection({
           onClick={() => onToggleDriver(driver)}
           title={`Toggle all laps for ${driver}`}
         >
-          <img src={imgCheckedCheckbox} alt="checkbox" />
+        <img 
+          src={allVisible ? imgCheckedCheckbox : imgUncheckedCheckbox} 
+          alt={allVisible ? "checked" : "unchecked"} 
+        />
         </button>
         <h3 className="driver-name">{driver}</h3>
       </div>

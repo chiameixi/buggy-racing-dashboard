@@ -28,6 +28,7 @@ const imgPencil = "../../public/icons/Pencil.png";
 const imgErase = "../../public/icons/Erase.png";
 const imgTrash = "../../public/icons/Trash.png";
 const imgUndo = "../../public/icons/Undo.png";
+const imgPause = "../../public/icons/Pause.png";
 
 interface ControlPanelProps {
   laps: Lap[];
@@ -37,16 +38,20 @@ interface ControlPanelProps {
   currentTime: number;
   playbackSpeed: number;
   isDrawMode: boolean;
-  drawnPathsCount: number;
+  activeTool: 'pencil' | 'erase' | null;
+  // drawnPathsCount: number;
   onToggleLap: (lapId: string) => void;
   onToggleDriver: (driver: string) => void;
   onToggleHeatmap: () => void;
   onTogglePlay: () => void;
   onSeek: (time: number) => void;
   onReset: () => void;
-  onToggleDrawMode: () => void;
+  onSetPencilTool: () => void;
+  onSetEraseTool: () => void;
+  // onToggleDrawMode: () => void;
   onClearDrawings: () => void;
   onUndoDrawing: () => void;
+  onRedoDrawing: () => void;
 };
 
 export function ControlPanel({ 
@@ -56,15 +61,19 @@ export function ControlPanel({
   isPlaying,
   currentTime,
   isDrawMode,
+  activeTool,
   onToggleLap, 
   onToggleDriver,
   onToggleHeatmap,
   onTogglePlay,
   onSeek,
   onReset,
-  onToggleDrawMode,
+  // onToggleDrawMode,
+  onSetPencilTool,
+  onSetEraseTool,
   onClearDrawings,
-  onUndoDrawing
+  onUndoDrawing,
+  onRedoDrawing
 }: ControlPanelProps) {
   const lapsByDriver = groupByDriver(laps);
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
@@ -121,7 +130,11 @@ export function ControlPanel({
               onClick={onTogglePlay}
               title={isPlaying ? "Pause" : "Play"}
             >
-              <img src={imgPlay} alt={isPlaying ? "Pause" : "Play"} className="btn-icon" />
+              <img 
+                src={isPlaying? imgPause : imgPlay} 
+                alt={isPlaying ? "Pause" : "Play"} 
+                className="btn-icon" 
+              />
               <span>{isPlaying ? 'pause' : 'play'}</span>
             </button>
           </div>
@@ -135,13 +148,16 @@ export function ControlPanel({
         </div>
       </div>
 
-      {/* Annotations Section */}
-      <div className="control-section annotations-section">
+      {/* Annotations Section */} 
+      <div 
+        className="control-section annotations-section"
+        onMouseLeave={() => setHoveredTool(null)}
+      >
         <h2 className="section-title">Annotations</h2>
         <div className="annotations-content">
           <button 
-            className={`tool-btn pencil-btn ${isDrawMode || hoveredTool === 'pencil' ? 'active' : ''}`}
-            onClick={onToggleDrawMode}
+            className={`tool-btn pencil-btn ${activeTool === 'pencil' ? 'active': ''} ${hoveredTool === 'pencil' ? 'hovered' : ''}`}
+            onClick={onSetPencilTool}
             onMouseEnter={() => setHoveredTool('pencil')}
             onMouseLeave={() => setHoveredTool(null)}
             title="Draw on map"
@@ -149,7 +165,8 @@ export function ControlPanel({
             <img src={imgPencil} alt="Pencil" />
           </button>
           <button 
-            className={`tool-btn erase-btn ${hoveredTool === 'erase' ? 'active' : ''}`}
+            className={`tool-btn erase-btn ${activeTool === 'erase' ? 'active': ''} ${hoveredTool === 'erase' ? 'hovered' : ''}`}
+            onClick={onSetEraseTool}
             onMouseEnter={() => setHoveredTool('erase')}
             onMouseLeave={() => setHoveredTool(null)}
             title="Erase drawings"
@@ -157,7 +174,7 @@ export function ControlPanel({
             <img src={imgErase} alt="Erase" />
           </button>
           <button 
-            className={`tool-btn trash-btn ${hoveredTool === 'trash' ? 'active' : ''}`}
+            className={`tool-btn trash-btn ${hoveredTool === 'trash' ? 'hovered' : ''}`}
             onClick={onClearDrawings}
             onMouseEnter={() => setHoveredTool('trash')}
             onMouseLeave={() => setHoveredTool(null)}
@@ -166,7 +183,7 @@ export function ControlPanel({
             <img src={imgTrash} alt="Trash" />
           </button>
           <button 
-            className={`tool-btn undo-btn ${hoveredTool === 'undo' ? 'active' : ''}`}
+            className={`tool-btn undo-btn ${hoveredTool === 'undo' ? 'hovered' : ''}`}
             onClick={onUndoDrawing}
             onMouseEnter={() => setHoveredTool('undo')}
             onMouseLeave={() => setHoveredTool(null)}
@@ -175,7 +192,8 @@ export function ControlPanel({
             <img src={imgUndo} alt="Undo" />
           </button>
           <button 
-            className={`tool-btn redo-btn ${hoveredTool === 'redo' ? 'active' : ''}`}
+            className={`tool-btn redo-btn ${hoveredTool === 'redo' ? 'hovered' : ''}`}
+            onClick={onRedoDrawing}
             onMouseEnter={() => setHoveredTool('redo')}
             onMouseLeave={() => setHoveredTool(null)}
             title="Redo last undo"

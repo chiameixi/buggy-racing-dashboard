@@ -24,4 +24,9 @@ dist-ssr
 *.sw?
 
 # GPX files 
-public/*.gpx
+# public/*.gpx
+
+# own notes
+personal/*.md
+personal/*.txt
+personal/*.html
