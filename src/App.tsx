@@ -26,6 +26,9 @@ function App() {
     activeTool,
     setPencilTool,
     setEraseTool,
+    setMarkerTool,
+    selectedMarkerType,
+    setSelectedMarkerType,
     drawingLayerRef,
     // drawnPaths,
     playbackSpeed,
@@ -38,6 +41,7 @@ function App() {
     toggleDriverVisibility,
     toggleHeatmap,
     showHeatmap,
+
     // toggleDrawMode,
     // addDrawnPath,
     redoLastDrawing,
@@ -60,6 +64,7 @@ function App() {
               currentTime={currentTime}
               isDrawMode={isDrawMode}
               activeTool={activeTool}
+              selectedMarkerType={selectedMarkerType}
               // drawnPathsCount={drawnPaths.length}
               onSetPencilTool={setPencilTool}
               onSetEraseTool={setEraseTool}
@@ -68,6 +73,8 @@ function App() {
               onToggleLap={toggleLapVisibility}
               onToggleDriver={toggleDriverVisibility}
               onTogglePlay={togglePlayback}
+              onSetMarkerTool={setMarkerTool}
+              onSetMarkerType={setSelectedMarkerType}
               onSeek ={setProgress}
               onReset={resetPlayback}
               // onToggleDrawMode={toggleDrawMode}
@@ -91,7 +98,9 @@ function App() {
             activeTool={activeTool}
             drawingLayerRef={drawingLayerRef}
             sidebarOpen={sidebarOpen}
-
+            selectedMarkerType={selectedMarkerType}
+            // onSetMarkerType={setSelectedMarkerType}
+            // onSetMarkerTool={setMarkerTool}
             // drawnPaths={drawnPaths}
             // onPathComplete={addDrawnPath}
           />}

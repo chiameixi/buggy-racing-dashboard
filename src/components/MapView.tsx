@@ -21,7 +21,8 @@ interface MapViewProps {
   showHeatmap?: boolean;
   currentTime: number; // percentage of playback progress 0-100
   isDrawMode: boolean;
-  activeTool: 'pencil' | 'erase' | null;
+  activeTool: 'pencil' | 'erase' | 'marker' | null;
+  selectedMarkerType: 'tree' | 'flag' | 'stop' |'generic';
   drawingLayerRef: React.RefObject<DrawingLayerHandle| null>;
   sidebarOpen?: boolean;
   // drawnPaths: Array<{ id: string; points: [number, number][] }>; // array of drawn paths
@@ -76,7 +77,8 @@ export function MapView({
   isDrawMode, 
   activeTool,
   drawingLayerRef,
-  sidebarOpen
+  sidebarOpen,
+  selectedMarkerType
   // drawnPaths, 
   // onPathComplete 
 }: MapViewProps) {
@@ -141,6 +143,7 @@ export function MapView({
           <DrawingLayer 
             ref={drawingLayerRef}
             activeTool={activeTool}
+            selectedMarkerType={selectedMarkerType}
             isDrawMode={isDrawMode}
             // drawnPaths={drawnPaths}
             // onPathComplete={onPathComplete}
