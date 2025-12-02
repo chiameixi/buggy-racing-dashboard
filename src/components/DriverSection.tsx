@@ -20,8 +20,9 @@ import { LapItem } from './LapItem';
 import './DriverSection.css';
 
 // Icon import
-const imgCheckedCheckbox = "../../public/icons/Checked Checkbox.png";
-const imgUncheckedCheckbox = "../../public/icons/Unchecked Checkbox.png";
+const imgCheckedCheckbox = "../../icons/Checked Checkbox.png";
+const imgUncheckedCheckbox = "../../icons/Unchecked Checkbox.png";
+// public/icons/Unchecked Checkbox.png
 
 interface DriverSectionProps {
   driver: string;

@@ -22,17 +22,17 @@ import './ControlPanel.css';
 
 // Icon imports
 // const imgCheckedCheckbox = "../../public/icons/Checked Checkbox.png";
-const imgPlay = "../../public/icons/Play.png";
-const imgReset = "../../public/icons/Reset.png";
-const imgPencil = "../../public/icons/Pencil.png";
-const imgErase = "../../public/icons/Erase.png";
-const imgTrash = "../../public/icons/Trash.png";
-const imgUndo = "../../public/icons/Undo.png";
-const imgPause = "../../public/icons/Pause.png";
-const imgMarker = "../../public/buggy.svg";
-const imgTree = "../../public/icons/Tree.png";
-const imgFlag = "../../public/icons/Flag.svg";
-const imgStop = "../../public/icons/Stop.png";
+const imgPlay = "../../icons/Play.png";
+const imgReset = "../../icons/Reset.png";
+const imgPencil = "../../icons/Pencil.png";
+const imgErase = "../../icons/Erase.png";
+const imgTrash = "../../icons/Trash.png";
+const imgUndo = "../../icons/Undo.png";
+const imgPause = "../../icons/Pause.png";
+const imgMarker = "../../buggy.svg";
+const imgTree = "../../icons/Tree.png";
+const imgFlag = "../../icons/Flag.svg";
+const imgStop = "../../icons/Stop.png";
 
 interface ControlPanelProps {
   laps: Lap[];
