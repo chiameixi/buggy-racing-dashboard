@@ -4,3 +4,6 @@ An interactive web-based dashboard for analyzing buggy racing performance throug
 # how to run
 - npm install
 - npm run dev and open up in browser
+
+# others
+- figma mockup, made in the process of conceptualising this idea: https://www.figma.com/design/zfZIVhItL8PTAwmzGLC6OQ/ssui-draft?node-id=0-1&t=dsrGDrYNJo37E3v6-1 
