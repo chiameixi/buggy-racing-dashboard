@@ -7,5 +7,11 @@ demo video: https://drive.google.com/file/d/1g0ap0u6Aur5SGQ4g1Vlyv2f_3eEouRxl/vi
 - npm install
 - npm run dev and open up in browser
 
+# file structure
+- public //contains source gpx data
+- src/components //one tsx/css file per component; links together visuals
+- src/hooks //drawing logic, connecting to leaflet logic
+- src/utils //contains functions to parse and load data
+
 # others
 - figma mockup, made in the process of conceptualising this idea: https://www.figma.com/design/zfZIVhItL8PTAwmzGLC6OQ/ssui-draft?node-id=0-1&t=dsrGDrYNJo37E3v6-1 
